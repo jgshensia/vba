@@ -1,6 +1,6 @@
 Attribute VB_Name = "Module2"
 ' this is the VB6/VBA equivalent of a struct data, no methods.
-' column No. of each field in over time table
+' column No. of each field in pay increase table
 Private Type SalaryIncreaseTable
     titleRowNo As Integer
     firstDataRowNo As Integer

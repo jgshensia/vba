@@ -96,10 +96,32 @@ If (calcGrp = PT Or calcGrp = CASUAL)
 		color this line with errMsg
 End If
 
-@todo: 
+
 '----------------------------------------------- DailyHours -----------------------------------
 check daily total hours (except PREM and STA) < column value in the table
 
 
 
-???'@todo: How to handle EXCESS_HRS_OT?
+
+
+
+@todo:  
+'------------------------------------------------ PayIncForPosTransfer ------------------------------------
+'Handle the manually maintained table(Master.xlsx) and 
+If (column Level2~Level11 is in this pay period) Then
+    color those date in  with green, 
+    color employee name with green
+End If
+
+
+@todo:  
+'------------------------------------------------ PTOCheck ------------------------------------
+ORG table column K/column D/column N
+BWFT: full time table.   column A/column E/column F
+BWPT: part time table.   column A/column E/column F
+
+If ORG.columnD = BWFT.columnA And ORG.columnK = BWFT.columnE Then
+	If (ORG.columnN < BWFT.columnF)
+		column this row in BWFT
+End If
+
