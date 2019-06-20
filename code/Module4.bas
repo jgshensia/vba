@@ -19,6 +19,9 @@ Private Const MAX_NOF_CODES_IN_CURR_HOURS = 2
 'Only look for in the first few rows for each table
 Private Const MAX_NO_ROWS_FOR_TABLE_TITLE = 10
 
+'Precision when comparing balance and used hours
+Private Const DEFAULT_ERR_PRECISION_THRESH = -0.02
+
 Private Const DEFAULT_BG_COLOR_FOR_MATCHED_CELL = vbGreen
 Private Const DEFAULT_FONT_COLOR_FOR_MATCHED_CELL = vbRed
 
@@ -277,13 +280,13 @@ Private Function getPtoTblAvailBalance(ByRef tgtStrEmpNum As String, _
     End With
     
     strUnionCode = oneEmpPtoBalRecords(1, ptoBalanceTblCfg.unionCodeColNo)
-    If strUnionCode <> "CAW" Then
-        errMsg = "Unsupported Union"
-        Call colorOneEmpInCurrHoursTable(tgtStrEmpNum, arrCurrHoursData, _
-                                        hoursWS, currHoursTblCfg, errMsg)
-        getPtoTblAvailBalance = False
-        Exit Function
-    End If
+'    If strUnionCode <> "CAW" Then
+'        errMsg = "Unsupported Union"
+'        Call colorOneEmpInCurrHoursTable(tgtStrEmpNum, arrCurrHoursData, _
+'                                        hoursWS, currHoursTblCfg, errMsg)
+'        getPtoTblAvailBalance = False
+'        Exit Function
+'    End If
 
     For i = 1 To nrOfRealPtoBalRowsForEmp
         strPlanCode = oneEmpPtoBalRecords(i, ptoBalanceTblCfg.ptoPlanCodeColNo)
@@ -353,7 +356,8 @@ Private Function colorOneRowInCurrHoursTable(ByRef tgtStrEmpNum As String, _
         If strEmpNum = tgtStrEmpNum And hours > 0 Then
             If strCode = tgtStrCode(1) Or strCode = tgtStrCode(2) Then
                 found = True
-                errMsg = strCode & " Overused = " & (usedH - balanceH) & ", Used/Balance = (" & usedH & "/" & balanceH & ")"
+                errMsg = strCode & " Overused = " & Format(usedH - balanceH, "Standard") & _
+                        ", Used/Balance = (" & Format(usedH, "Standard") & "/" & Format(balanceH, "Standard") & ")"
                 hoursWS.UsedRange.Rows(i + currHoursTblCfg.titleRowNo).Font.Color = DEFAULT_FONT_COLOR_FOR_ABNORMAL_ROW
                 hoursWS.UsedRange.Rows(i + currHoursTblCfg.titleRowNo).Interior.Color = DEFAULT_BG_COLOR_FOR_ABNORMAL_ROW
                 hoursWS.Cells(i + currHoursTblCfg.titleRowNo, currHoursTblCfg.errMsgColNo) = errMsg
@@ -366,7 +370,7 @@ Private Function colorOneRowInCurrHoursTable(ByRef tgtStrEmpNum As String, _
         For i = 1 To UBound(arrCurrHoursData)
             strEmpNum = arrCurrHoursData(i, currHoursTblCfg.empNumColNo)
             If strEmpNum = tgtStrEmpNum Then
-                errMsg = tgtStrCode(1) & " Overused Before = " & (usedH - balanceH) & ", Used/Balance = (" & usedH & "/" & balanceH & ")"
+                errMsg = "Previous " & tgtStrCode(1) & " Overused = " & (usedH - balanceH) & ", Used/Balance = (" & usedH & "/" & balanceH & ")"
                 hoursWS.UsedRange.Rows(i + currHoursTblCfg.titleRowNo).Font.Color = DEFAULT_FONT_COLOR_FOR_ABNORMAL_ROW
                 hoursWS.UsedRange.Rows(i + currHoursTblCfg.titleRowNo).Interior.Color = DEFAULT_BG_COLOR_FOR_ABNORMAL_ROW
                 hoursWS.Cells(i + currHoursTblCfg.titleRowNo, currHoursTblCfg.errMsgColNo) = errMsg
@@ -403,7 +407,7 @@ Private Function handleHoursBalanceDiff(ByRef tgtStrEmpNum As String, _
     Dim strCode(MAX_NOF_CODES_IN_CURR_HOURS) As String
     Dim ret As Single
     
-    If (ptoAvailBalance.familyH - currHoursUsed.famH) < 0 Then
+    If (ptoAvailBalance.familyH - currHoursUsed.famH) < DEFAULT_ERR_PRECISION_THRESH Then
         strCode(1) = "FAMAV"
         strCode(2) = "FAMLY"
         Call colorOneRowInCurrHoursTable(tgtStrEmpNum, arrCurrHoursData, _
@@ -411,7 +415,7 @@ Private Function handleHoursBalanceDiff(ByRef tgtStrEmpNum As String, _
                                         strCode, currHoursUsed.famH, ptoAvailBalance.familyH)
     End If
     
-    If (ptoAvailBalance.bankH - currHoursUsed.otuH) < 0 Then
+    If (ptoAvailBalance.bankH - currHoursUsed.otuH) < DEFAULT_ERR_PRECISION_THRESH Then
         strCode(1) = "OTU"
         strCode(2) = "OTUAV"
         Call colorOneRowInCurrHoursTable(tgtStrEmpNum, arrCurrHoursData, _
@@ -419,7 +423,7 @@ Private Function handleHoursBalanceDiff(ByRef tgtStrEmpNum As String, _
                                         strCode, currHoursUsed.otuH, ptoAvailBalance.bankH)
     End If
     
-    If (ptoAvailBalance.sickH - currHoursUsed.sckH) < 0 Then
+    If (ptoAvailBalance.sickH - currHoursUsed.sckH) < DEFAULT_ERR_PRECISION_THRESH Then
         strCode(1) = "SICK"
         strCode(2) = "SCKAV"
         Call colorOneRowInCurrHoursTable(tgtStrEmpNum, arrCurrHoursData, _
@@ -427,7 +431,7 @@ Private Function handleHoursBalanceDiff(ByRef tgtStrEmpNum As String, _
                                         strCode, currHoursUsed.sckH, ptoAvailBalance.sickH)
     End If
     
-    If (ptoAvailBalance.vacatH - currHoursUsed.vacH) < 0 Then
+    If (ptoAvailBalance.vacatH - currHoursUsed.vacH) < DEFAULT_ERR_PRECISION_THRESH Then
         strCode(1) = "VACH"
         strCode(2) = "VACAV"
         Call colorOneRowInCurrHoursTable(tgtStrEmpNum, arrCurrHoursData, _
