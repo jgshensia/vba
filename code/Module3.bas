@@ -4,7 +4,7 @@ Attribute VB_Name = "Module3"
 
 Private Const EMP_PAY_INC_LEVEL_START = 2
 Private Const EMP_PAY_INC_LEVEL_END = 11
-Private Const DEFAULT_BG_COLOR_FOR_MATCHED_CELL = vbGreen
+Private Const DEFAULT_BG_COLOR_FOR_MATCHED_CELL = 5296274
 Private Const DEFAULT_FONT_COLOR_FOR_MATCHED_CELL = vbRed
 
 Private Type IncreaseDateTbl
@@ -16,8 +16,6 @@ Private Type IncreaseDateTbl
     levelColNo(EMP_PAY_INC_LEVEL_START To EMP_PAY_INC_LEVEL_END) As Integer
 End Type
 
-Private Const DEFAULT_BG_COLOR_FOR_MATCHED_CELL = vbGreen
-Private Const DEFAULT_FONT_COLOR_FOR_MATCHED_CELL = vbRed
 
 'Find the coloumn No. of each field in the table
 Private Function getTableCfg(lastRowNo As Long, lastColNo As Long, ByRef tblCfg As IncreaseDateTbl)
@@ -64,16 +62,17 @@ Private Function chkTbleCfg(ByRef tblCfg As IncreaseDateTbl) As Boolean
     Dim result As Boolean: result = True
 
     With tblCfg
-        If  (.firstDataRowNo <= 0) Or (.titleRowNo <= 0) Or _
+        If (.firstDataRowNo <= 0) Or (.titleRowNo <= 0) Or _
             (.empNameColNo <= 0) Then
             result = False
         Else
             For j = EMP_PAY_INC_LEVEL_START To EMP_PAY_INC_LEVEL_END
-                If .levelColNo(j) <= 0 Then 
+                If .levelColNo(j) <= 0 Then
                     result = False
                     Exit For
                 End If
             Next j
+        End If
     End With
 
     chkTbleCfg = result
@@ -84,7 +83,7 @@ Private Function isCurrDateInPayPeriod(ByRef currDate As Date, _
     Dim payPeriodEndDate As Date
     payPeriodEndDate = DateAdd("d", 14 - 1, payPeriodStartDate)
     
-    If currDate >= payPeriodStartDate And currDate <= payPeriodEndDate Then
+    If IsDate(currDate) And currDate >= payPeriodStartDate And currDate <= payPeriodEndDate Then
         isCurrDateInPayPeriod = True
     Else
         isCurrDateInPayPeriod = False
@@ -147,18 +146,20 @@ Sub PayIncForPosTransfer()
     Dim rowMatched As Boolean
     Dim empName As String
     Dim levelDate(EMP_PAY_INC_LEVEL_START To EMP_PAY_INC_LEVEL_END) As Date
+    Dim levelCol As Integer
 
     'Read each data row
     For i = 1 To UBound(arrAllValidData)
         rowMatched = False
 
-        empName = arrAllValidData(i, empNameColNo)
+        empName = arrAllValidData(i, tblCfg.empNameColNo)
         'See if we have any dates can match this pay period
         For j = EMP_PAY_INC_LEVEL_START To EMP_PAY_INC_LEVEL_END
-            levelDate(j) = arrAllValidData(i, levelColNo(j))
+            levelCol = tblCfg.levelColNo(j)
+            levelDate(j) = arrAllValidData(i, levelCol)
             If isCurrDateInPayPeriod(levelDate(j), payPeriodStartDate) Then
                 rowMatched = True
-                ActiveSheet.Cells(i + tblCfg.titleRowNo, tblCfg.levelColNo(j)).Interior.Color = _
+                ActiveSheet.Cells(i + tblCfg.titleRowNo, levelCol).Interior.Color = _
                                 DEFAULT_BG_COLOR_FOR_MATCHED_CELL
             End If
         Next j

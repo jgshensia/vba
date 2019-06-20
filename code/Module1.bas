@@ -188,7 +188,7 @@ Function getAllRowsHasSameOneColValInArray(titleRowNo As Integer, targetCol As I
                                         ByRef arrDataIn As Variant, nrRowsArrIn As Integer, _
                                         ByRef arrDataOut As Variant, ByRef nrOfRealRowsOut As Integer)
     Dim i As Integer
-    Dim nrColsArrIn As Integer: nrColsArrIn = ActiveSheet.UsedRange.Columns.Count
+    Dim nrColsArrIn As Integer: nrColsArrIn = UBound(arrDataIn, 2) 'ActiveSheet.UsedRange.Columns.Count
     
     nrOfRealRowsOut = 0
     For i = 1 To nrRowsArrIn

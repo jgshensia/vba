@@ -104,8 +104,7 @@ check daily total hours (except PREM and STA) < column value in the table
 
 
 
-
-@todo:  
+@totest:
 '------------------------------------------------ PayIncForPosTransfer ------------------------------------
 'Handle the manually maintained table(Master.xlsx) and 
 If (column Level2~Level11 is in this pay period) Then
@@ -114,14 +113,22 @@ If (column Level2~Level11 is in this pay period) Then
 End If
 
 
-@todo:  
+@totest:  
 '------------------------------------------------ PTOCheck ------------------------------------
-ORG table column K/column D/column N
+ORG table column D/column J/column N
+1) only care CAW union
+2) only care 4 values in column J
+	BANKH
+	FAMILY
+	SICK
+	VACAT
+
 BWFT: full time table.   column A/column E/column F
+1) 
+2) only care 
 BWPT: part time table.   column A/column E/column F
 
 If ORG.columnD = BWFT.columnA And ORG.columnK = BWFT.columnE Then
 	If (ORG.columnN < BWFT.columnF)
 		column this row in BWFT
 End If
-
